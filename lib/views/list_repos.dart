@@ -14,8 +14,8 @@ class ListRepos extends StatefulWidget {
 }
 
 class _ListReposState extends State<ListRepos> {
-  final List<dynamic> _repos = [];
-
+  final List<Repo> _repos = [];
+  bool _isLoading = true; // Add loading indicator state
 
   @override
   void initState() {
@@ -27,40 +27,47 @@ class _ListReposState extends State<ListRepos> {
     const dataUrl =
         'https://api.github.com/search/repositories?q=language%3APython&sort=stars&order=desc';
 
-    final response = await http.get(Uri.parse(dataUrl));
+    try {
+      final response = await http.get(Uri.parse(dataUrl));
 
-  
+      if (response.statusCode == 200) {
+        setState(() {
+          final Map<String, dynamic> repoMap = json.decode(response.body);
+          final List<dynamic> data = repoMap['items'];
 
-    if (response.statusCode == 200) {
-    setState(() {
- 
-      final Map<String, dynamic> repoMap = json.decode(response.body);
-      final List<dynamic> data = repoMap['items'];
-
-      for (final item in data) {
-        final name = item['name'] as String? ?? '';
-        final url = item['html_url'] as String? ?? '';
-        final description = item['description'] as String? ?? 'N/A';
-        final repo = Repo(name, url, description);
-        _repos.add(repo);
+          _repos.clear(); // Clear any old data
+          for (final item in data) {
+            final name = item['name'] as String? ?? '';
+            final url = item['html_url'] as String? ?? '';
+            final description = item['description'] as String? ?? 'N/A';
+            final repo = Repo(name, url, description);
+            _repos.add(repo);
+          }
+          _isLoading = false; // Stop loading once data is fetched
+        });
+      } else {
+        print('Failed to load data: ${response.statusCode}');
+        setState(() {
+          _isLoading = false;
+        });
       }
-      
-  
-    });
-    } else {
-      print('Failed to load data: ${response.statusCode}');
+    } catch (e) {
+      print('Error fetching data: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   Widget _buildRow(int i) {
-  return Stack(children: <Widget>[
-
-     Container(
+    return Stack(children: <Widget>[
+      // Repo title (clickable)
+      Container(
         padding: const EdgeInsets.only(left: 10.0, right: 37.0, top: 5.0),
         child: TextButton(
           child: Text('${_repos[i].name}', style: styles.repoNameFont),
           onPressed: () {
-            String htmlURL = _repos[i].url;
+            String htmlURL = _repos[i].htmlURL; // Correct property name
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -71,30 +78,39 @@ class _ListReposState extends State<ListRepos> {
         ),
       ),
 
-    Container(
-      padding:
-          EdgeInsets.only(left: 19.0, right: 37.0, top: 51.0, bottom: 5.0),
-      child: Text('${_repos[i].description}', style: styles.descriptionFont),
-    ),
+      // Repo description
+      Container(
+        padding: const EdgeInsets.only(
+            left: 19.0, right: 37.0, top: 51.0, bottom: 5.0),
+        child: Text('${_repos[i].description}', style: styles.descriptionFont),
+      ),
+    ]);
+  }
 
-  ]);
-}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(strings.appTitle),
       ),
-
-    body: ListView.separated(
-        itemCount: _repos.length,
-        itemBuilder: (BuildContext context, int position) {
-          return _buildRow(position);
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          return const Divider();
-        },
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator()) // Show spinner while loading
+          : _repos.isEmpty
+              ? const Center(
+                  child: Text(
+                    "No Repositories Found",
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                )
+              : ListView.separated(
+                  itemCount: _repos.length,
+                  itemBuilder: (BuildContext context, int position) {
+                    return _buildRow(position);
+                  },
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
+                ),
     );
   }
 }
