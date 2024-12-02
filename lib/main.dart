@@ -19,27 +19,26 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: ListRepos(),
+      home: const ListRepos(),
      
     );
   }
 }
-class ListRepos extends StatelessWidget {
-  const ListRepos({super.key});
+// class ListRepos extends StatelessWidget {
+//   const ListRepos({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Repositories"), // Adds a title to the app bar
-        
-      ),
-      body: Center(
-        child: Text(
-          "No Repositories Found",
-          style: TextStyle(fontSize: 18, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Repositories"), // Adds a title to the app bar
+//       ),
+//       body: Center(
+//         child: Text(
+//           "No Repositories Found",
+//           style: TextStyle(fontSize: 18, color: Colors.grey),
+//         ),
+//       ),
+//     );
+//   }
+// }

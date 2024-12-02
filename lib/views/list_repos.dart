@@ -55,9 +55,6 @@ class _ListReposState extends State<ListRepos> {
   Widget _buildRow(int i) {
   return Stack(children: <Widget>[
 
-    
-  
-
      Container(
         padding: const EdgeInsets.only(left: 10.0, right: 37.0, top: 5.0),
         child: TextButton(
@@ -99,8 +96,5 @@ class _ListReposState extends State<ListRepos> {
         },
       ),
     );
-
-
-
   }
 }
